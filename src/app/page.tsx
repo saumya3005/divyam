@@ -1,69 +1,77 @@
-import Image from "next/image";
+import { ArrowRight } from "lucide-react";
+import Link from "next/link";
 
-export default function Home() {
+/**
+ * Home Page (Landing / Splash)
+ *
+ * Temporary entry point that showcases the design system tokens
+ * are working correctly. Will be replaced with a proper landing
+ * page or redirect to /dashboard once auth is implemented.
+ */
+export default function HomePage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-bg-base px-6">
+      {/* Decorative background orbs */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div className="absolute top-1/4 left-1/3 h-125 w-125 rounded-full bg-primary/5 blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/3 h-100 w-100 rounded-full bg-accent/5 blur-3xl" />
+      </div>
+
+      {/* Content */}
+      <div className="relative z-10 mx-auto max-w-2xl text-center">
+        {/* Badge */}
+        <div className="mb-8 inline-flex items-center gap-2 rounded-pill border border-border bg-surface-1 px-4 py-1.5 text-xs font-medium text-foreground-secondary shadow-sm">
+          <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+          Design System Active
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+
+        {/* Heading */}
+        <h1 className="font-display text-5xl font-medium leading-tight tracking-tight text-foreground md:text-6xl">
+          Welcome to{" "}
+          <span className="text-gradient-primary">Divyam</span>
+        </h1>
+
+        {/* Subtitle */}
+        <p className="mx-auto mt-6 max-w-lg text-lg text-foreground-secondary">
+          Premium Event Booking & Management Platform. Enterprise-grade
+          sophistication, effortless experience.
+        </p>
+
+        {/* CTA Buttons */}
+        <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+          <Link
+            href="/login"
+            className="group inline-flex items-center gap-2 rounded-sm bg-primary px-8 py-3.5 text-sm font-medium text-secondary shadow-glow transition-all duration-(--duration-micro) ease-decelerate hover:-translate-y-px hover:bg-primary-hover hover:shadow-lg active:translate-y-px"
           >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            Get Started
+            <ArrowRight className="h-4 w-4 transition-transform duration-(--duration-micro) group-hover:translate-x-1" />
+          </Link>
+
+          <Link
+            href="/dashboard"
+            className="inline-flex items-center gap-2 rounded-sm border border-border bg-surface-1 px-8 py-3.5 text-sm font-medium text-foreground transition-all duration-(--duration-micro) ease-decelerate hover:-translate-y-px hover:border-border-hover hover:shadow-md active:translate-y-px"
           >
-            Documentation
-          </a>
+            View Dashboard
+          </Link>
         </div>
-      </main>
+
+        {/* Design Token Showcase */}
+        <div className="mt-20 grid grid-cols-2 gap-4 sm:grid-cols-4">
+          {[
+            { label: "Champagne", className: "bg-primary" },
+            { label: "Copper", className: "bg-accent" },
+            { label: "Forest", className: "bg-secondary" },
+            { label: "Success", className: "bg-success" },
+          ].map(({ label, className }) => (
+            <div key={label} className="flex flex-col items-center gap-2">
+              <div
+                className={`h-12 w-12 rounded-lg ${className} shadow-md`}
+              />
+              <span className="text-xs text-foreground-tertiary">{label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
