@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Outfit, JetBrains_Mono } from "next/font/google";
 import { AppProviders } from "@/providers";
-import { Toaster } from "sonner";
 import { VisitorTracker } from "@/core/components/VisitorTracker";
 import "./globals.css";
 
@@ -44,7 +43,7 @@ export const metadata: Metadata = {
 
 /* ─── Root Layout ──────────────────────────────────────────────────── */
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
       lang="en"
@@ -55,7 +54,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <AppProviders>
           <VisitorTracker />
           {children}
-          <Toaster theme="dark" position="top-right" />
         </AppProviders>
       </body>
     </html>
