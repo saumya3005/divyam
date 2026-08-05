@@ -27,11 +27,12 @@ import {
 } from "lucide-react";
 
 const ADMIN_NAV_LINKS = [
-  { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
+  { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
   { name: "Bookings", href: "/admin/bookings", icon: Ticket },
   { name: "Customers", href: "/admin/customers", icon: Users },
   { name: "Employees", href: "/admin/employees", icon: UserCog },
   { name: "Services", href: "/admin/services", icon: Briefcase },
+  { name: "Events", href: "/admin/events", icon: Calendar },
   { name: "Inventory", href: "/admin/inventory", icon: Package },
   { name: "Payments", href: "/admin/payments", icon: CreditCard },
   { name: "Revenue", href: "/admin/revenue", icon: DollarSign },
@@ -65,7 +66,7 @@ export default function AdminLayout({
     
     // Protect admin routes
     if (user && user.role !== "admin") {
-      router.push("/dashboard"); // Redirect normal users
+      router.replace("/unauthorized"); // Redirect normal users
     }
   }, [isAuthenticated, user, router]);
 
@@ -93,7 +94,7 @@ export default function AdminLayout({
         }`}
       >
         <div className="h-16 flex items-center px-6 border-b border-white/5 justify-between">
-          <Link href="/admin" className="text-xl font-bold tracking-wider text-brand-gold flex items-center gap-2">
+          <Link href="/admin/dashboard" className="text-xl font-bold tracking-wider text-brand-gold flex items-center gap-2">
             DIVYAM <span className="text-xs px-2 py-0.5 bg-red-500/20 text-red-400 rounded-md">ADMIN</span>
           </Link>
           <button className="lg:hidden text-brand-gray hover:text-white" onClick={() => setIsSidebarOpen(false)}>

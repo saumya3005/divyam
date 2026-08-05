@@ -2,6 +2,8 @@ import { Request, Response, NextFunction } from "express";
 import Razorpay from "razorpay";
 import crypto from "crypto";
 import { Booking } from "../models/Booking";
+import { Notification } from "../models/Notification";
+import { User } from "../models/User";
 import { AppError } from "../utils/AppError";
 
 // Razorpay Instance
@@ -79,11 +81,37 @@ export const verifyPayment = async (req: Request, res: Response, next: NextFunct
       return next(new AppError("Booking not found", 404));
     }
 
+    // Helper function for notifications
+    const createPaymentNotifications = async (bookingDoc: any) => {
+      // Notify customer
+      await Notification.create({
+        recipient: bookingDoc.userId,
+        type: "payment_received",
+        title: "Payment Successful",
+        message: `Your payment for booking ${bookingDoc.serviceType} was successful.`,
+        link: `/dashboard/bookings/${bookingDoc._id}`
+      });
+
+      // Notify admins
+      const admins = await User.find({ role: "admin" });
+      for (const admin of admins) {
+        await Notification.create({
+          recipient: admin._id,
+          type: "payment_received",
+          title: "Payment Received",
+          message: `Payment received for booking ${bookingDoc.serviceType}.`,
+          link: `/admin/payments`
+        });
+      }
+    };
+
     // MOCK MODE: Bypass signature verification
     if (mock) {
       booking.paymentStatus = "Payment Successful";
       booking.paymentId = `pay_mock_${Date.now()}`;
       await booking.save();
+
+      await createPaymentNotifications(booking);
 
       return res.status(200).json({
         success: true,
@@ -106,6 +134,8 @@ export const verifyPayment = async (req: Request, res: Response, next: NextFunct
       booking.paymentStatus = "Payment Successful";
       booking.paymentId = razorpay_payment_id;
       await booking.save();
+
+      await createPaymentNotifications(booking);
 
       res.status(200).json({
         success: true,

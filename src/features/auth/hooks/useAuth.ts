@@ -20,9 +20,9 @@ export const useAuth = () => {
     
     // 4. Redirect to appropriate dashboard based on role
     if (data.data.user.role === "admin") {
-      router.push("/admin");
+      router.replace("/admin/dashboard");
     } else {
-      router.push("/dashboard");
+      router.replace("/customer/dashboard");
     }
   };
 

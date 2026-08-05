@@ -8,6 +8,7 @@ export interface BookingType {
   phone: string;
   serviceType: string;
   serviceId?: string | { _id: string, title: string };
+  eventId?: string | { _id: string, title: string };
   bookingDate: string;
   bookingTime: string;
   guests: number;

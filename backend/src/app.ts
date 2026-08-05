@@ -7,7 +7,12 @@ import { AppError } from "./utils/AppError";
 import apiRoutes from "./routes";
 import authRoutes from "./routes/auth.routes";
 import bookingRoutes from "./routes/booking.routes";
+import adminRoutes from "./routes/admin.routes";
+import queryRoutes from "./routes/query.routes";
+import visitorRoutes from "./routes/visitor.routes";
+import notificationRoutes from "./routes/notification.routes";
 import paymentRoutes from "./routes/payment.routes";
+import eventRoutes from "./routes/event.routes";
 
 export const createApp = (): Express => {
   const app = express();
@@ -29,7 +34,11 @@ export const createApp = (): Express => {
   // Mount Routes
   app.use("/api/v1/auth", authRoutes);
   app.use("/api/v1/bookings", bookingRoutes);
+  app.use("/api/v1/events", eventRoutes);
   app.use("/api/v1/payment", paymentRoutes);
+  app.use("/api/v1/queries", queryRoutes);
+  app.use("/api/v1/visitors", visitorRoutes);
+  app.use("/api/v1/notifications", notificationRoutes);
 
   // API Routes will be mounted here
   app.use("/api/v1", apiRoutes);

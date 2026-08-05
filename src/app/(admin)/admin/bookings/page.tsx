@@ -69,7 +69,9 @@ export default function BookingsPage() {
                   <tr key={booking._id} className="hover:bg-white/5 transition-colors">
                     <td className="px-6 py-4 font-mono text-xs">{booking._id.slice(-6)}</td>
                     <td className="px-6 py-4 font-medium text-white">{booking.customerName}</td>
-                    <td className="px-6 py-4">{booking.serviceType}</td>
+                    <td className="px-6 py-4">
+                      {booking.serviceId ? (booking.serviceId as any).title : booking.eventId ? (booking.eventId as any).title : booking.serviceType}
+                    </td>
                     <td className="px-6 py-4">{booking.bookingDate.split('T')[0]} at {booking.bookingTime}</td>
                     <td className="px-6 py-4">
                       <span className={`px-2.5 py-1 text-xs rounded-full border ${

@@ -34,9 +34,12 @@ export default function AdminDashboardPage() {
   const summaryCards = [
     { title: "Total Revenue", value: `₹${stats.totalRevenue.toLocaleString("en-IN")}`, icon: TrendingUp, color: "text-green-400", bg: "bg-green-400/10" },
     { title: "Total Bookings", value: stats.totalBookings, icon: Ticket, color: "text-brand-gold", bg: "bg-brand-gold/10" },
-    { title: "Pending Requests", value: stats.pendingBookings, icon: CalendarCheck, color: "text-blue-400", bg: "bg-blue-400/10" },
-    { title: "Completed Events", value: stats.completedBookings, icon: CheckCircle2, color: "text-purple-400", bg: "bg-purple-400/10" },
-    { title: "Total Customers", value: stats.totalUsers, icon: Users, color: "text-brand-gray", bg: "bg-white/5" },
+    { title: "Confirmed Bookings", value: stats.confirmedBookings, icon: CheckCircle2, color: "text-purple-400", bg: "bg-purple-400/10" },
+    { title: "Completed Bookings", value: stats.completedBookings, icon: CheckCircle2, color: "text-green-400", bg: "bg-green-400/10" },
+    { title: "Rejected Bookings", value: stats.rejectedBookings, icon: CheckCircle2, color: "text-red-400", bg: "bg-red-400/10" },
+    { title: "Pending Bookings", value: stats.pendingBookings, icon: CalendarCheck, color: "text-brand-gold", bg: "bg-brand-gold/10" },
+    { title: "Total Users", value: stats.totalUsers, icon: Users, color: "text-brand-gray", bg: "bg-white/5" },
+    { title: "Total Services", value: stats.totalServices, icon: Users, color: "text-brand-gray", bg: "bg-white/5" },
   ];
 
   return (

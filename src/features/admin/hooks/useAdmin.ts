@@ -58,3 +58,43 @@ export const useGetAllBookingsAdmin = () => {
     },
   });
 };
+
+export const useGetEmployees = () => {
+  return useQuery({
+    queryKey: ["admin", "employees"],
+    queryFn: async () => {
+      const { data } = await apiClient.get<{ success: boolean; data: any[] }>("/extra/employees");
+      return data.data;
+    },
+  });
+};
+
+export const useGetInventory = () => {
+  return useQuery({
+    queryKey: ["admin", "inventory"],
+    queryFn: async () => {
+      const { data } = await apiClient.get<{ success: boolean; data: any[] }>("/extra/inventory");
+      return data.data;
+    },
+  });
+};
+
+export const useGetApprovals = () => {
+  return useQuery({
+    queryKey: ["admin", "approvals"],
+    queryFn: async () => {
+      const { data } = await apiClient.get<{ success: boolean; data: any[] }>("/extra/approvals");
+      return data.data;
+    },
+  });
+};
+
+export const useGetNotifications = () => {
+  return useQuery({
+    queryKey: ["admin", "notifications"],
+    queryFn: async () => {
+      const { data } = await apiClient.get<{ success: boolean; count: number; data: { notifications: any[] } }>("/admin/notifications");
+      return data.data.notifications;
+    },
+  });
+};

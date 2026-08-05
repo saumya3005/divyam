@@ -18,11 +18,12 @@ import {
 } from "lucide-react";
 
 const NAV_LINKS = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "My Bookings", href: "/dashboard/bookings", icon: Ticket },
-  { name: "Payments", href: "/dashboard/payments", icon: CreditCard },
-  { name: "Profile", href: "/dashboard/profile", icon: User },
-  { name: "Settings", href: "/dashboard/settings", icon: Settings },
+  { name: "Dashboard", href: "/customer/dashboard", icon: LayoutDashboard },
+  { name: "My Bookings", href: "/customer/bookings", icon: Ticket },
+  { name: "Events", href: "/customer/events", icon: Ticket },
+  { name: "Payments", href: "/customer/payments", icon: CreditCard },
+  { name: "Profile", href: "/customer/profile", icon: User },
+  { name: "Settings", href: "/customer/settings", icon: Settings },
 ];
 
 export default function DashboardLayout({
@@ -43,7 +44,11 @@ export default function DashboardLayout({
     if (!token && !isAuthenticated) {
       router.push("/login?role=customer");
     }
-  }, [isAuthenticated, router]);
+    // Protect customer routes
+    if (user && user.role === "admin") {
+      router.replace("/admin/dashboard");
+    }
+  }, [isAuthenticated, user, router]);
 
   if (!isMounted) return null;
 
@@ -69,7 +74,7 @@ export default function DashboardLayout({
         }`}
       >
         <div className="h-16 flex items-center px-6 border-b border-white/5 justify-between">
-          <Link href="/dashboard" className="text-xl font-bold tracking-wider text-brand-gold">
+          <Link href="/customer/dashboard" className="text-xl font-bold tracking-wider text-brand-gold">
             DIVYAM
           </Link>
           <button className="lg:hidden text-brand-gray hover:text-white" onClick={() => setIsSidebarOpen(false)}>

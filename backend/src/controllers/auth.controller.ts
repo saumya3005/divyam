@@ -45,7 +45,7 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
 
 export const login = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, role } = req.body;
 
     // Check if email and password exist
     if (!email || !password) {
@@ -57,6 +57,11 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     
     if (!user || !(await comparePasswords(password, user.password as string))) {
       return next(new AppError("Incorrect email or password", 401));
+    }
+
+    // Check admin gate
+    if (role === "admin" && user.role !== "admin") {
+      return next(new AppError("Unauthorized Access: Admin privileges required", 403));
     }
 
     // Generate token

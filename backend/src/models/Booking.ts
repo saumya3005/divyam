@@ -3,6 +3,7 @@ import mongoose, { Document, Schema } from "mongoose";
 export interface IBooking extends Document {
   userId: mongoose.Types.ObjectId;
   serviceId?: mongoose.Types.ObjectId;
+  eventId?: mongoose.Types.ObjectId;
   customerName: string;
   email: string;
   phone: string;
@@ -30,6 +31,10 @@ const bookingSchema = new Schema<IBooking>(
     serviceId: {
       type: Schema.Types.ObjectId,
       ref: "Service",
+    },
+    eventId: {
+      type: Schema.Types.ObjectId,
+      ref: "Event",
     },
     customerName: {
       type: String,

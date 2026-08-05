@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Outfit, JetBrains_Mono } from "next/font/google";
 import { AppProviders } from "@/providers";
 import { Toaster } from "sonner";
+import { VisitorTracker } from "@/core/components/VisitorTracker";
 import "./globals.css";
 
 /* ─── Font Configuration ───────────────────────────────────────────── */
@@ -58,6 +59,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col bg-bg-base text-foreground antialiased">
         <AppProviders>
+          <VisitorTracker />
           {children}
           <Toaster theme="dark" position="top-right" />
         </AppProviders>
