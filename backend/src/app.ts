@@ -19,7 +19,14 @@ export const createApp = (): Express => {
 
   // Middleware
   app.use(helmet());
-  app.use(cors());
+  app.use(
+    cors({
+      origin: process.env.CLIENT_URL || "https://divyam-psi.vercel.app",
+      credentials: true,
+      methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization"],
+    })
+  );
   app.use(express.json());
 
   if (process.env.NODE_ENV === "development") {

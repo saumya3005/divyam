@@ -4,6 +4,8 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ShieldCheck, UserCircle2 } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export default function LoginPage() {
   return (
     <div className="flex flex-col w-full max-w-md mx-auto">
