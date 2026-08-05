@@ -1,66 +1,88 @@
 import mongoose, { Document, Schema } from "mongoose";
 
 export interface IBooking extends Document {
-  customer: mongoose.Types.ObjectId;
-  event: mongoose.Types.ObjectId;
-  startDate: Date;
-  endDate: Date;
-  attendees: number;
-  status: "pending" | "confirmed" | "completed" | "cancelled";
-  totalPrice: number;
-  paymentStatus: "unpaid" | "partial" | "paid" | "refunded";
-  specialRequests?: string;
-  assignedStaff?: mongoose.Types.ObjectId[];
+  userId: mongoose.Types.ObjectId;
+  serviceId?: mongoose.Types.ObjectId;
+  customerName: string;
+  email: string;
+  phone: string;
+  serviceType: string;
+  bookingDate: Date;
+  bookingTime: string;
+  guests: number;
+  address: string;
+  notes?: string;
+  bookingStatus: "Pending" | "Confirmed" | "Completed" | "Cancelled" | "Rejected";
+  paymentStatus: "Payment Pending" | "Payment Successful" | "Refunded";
+  paymentId?: string;
+  amount: number;
   createdAt: Date;
   updatedAt: Date;
 }
 
 const bookingSchema = new Schema<IBooking>(
   {
-    customer: {
+    userId: {
       type: Schema.Types.ObjectId,
-      ref: "Customer",
-      required: [true, "Booking must belong to a customer"],
+      ref: "User",
+      required: [true, "Booking must belong to a user"],
     },
-    event: {
+    serviceId: {
       type: Schema.Types.ObjectId,
-      ref: "Event",
-      required: [true, "Booking must be linked to an event"],
+      ref: "Service",
     },
-    startDate: {
-      type: Date,
-      required: [true, "Start date is required"],
-    },
-    endDate: {
-      type: Date,
-      required: [true, "End date is required"],
-    },
-    attendees: {
-      type: Number,
-      required: [true, "Number of attendees is required"],
-      min: [1, "Must have at least 1 attendee"],
-    },
-    status: {
+    customerName: {
       type: String,
-      enum: ["pending", "confirmed", "completed", "cancelled"],
-      default: "pending",
+      required: [true, "Customer name is required"],
+      trim: true,
     },
-    totalPrice: {
+    email: {
+      type: String,
+      required: [true, "Email is required"],
+      lowercase: true,
+      trim: true,
+    },
+    phone: {
+      type: String,
+      required: [true, "Phone is required"],
+    },
+    serviceType: {
+      type: String,
+      required: [true, "Service/Event type is required"],
+    },
+    bookingDate: {
+      type: Date,
+      required: [true, "Booking date is required"],
+    },
+    bookingTime: {
+      type: String,
+      required: [true, "Booking time is required"],
+    },
+    guests: {
       type: Number,
-      required: [true, "Total price is required"],
+      required: [true, "Number of guests is required"],
+      min: [1, "Must have at least 1 guest"],
+    },
+    address: {
+      type: String,
+      required: [true, "Address is required"],
+    },
+    notes: String,
+    bookingStatus: {
+      type: String,
+      enum: ["Pending", "Confirmed", "Completed", "Cancelled", "Rejected"],
+      default: "Pending",
     },
     paymentStatus: {
       type: String,
-      enum: ["unpaid", "partial", "paid", "refunded"],
-      default: "unpaid",
+      enum: ["Payment Pending", "Payment Successful", "Refunded"],
+      default: "Payment Pending",
     },
-    specialRequests: String,
-    assignedStaff: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
+    paymentId: String,
+    amount: {
+      type: Number,
+      required: [true, "Amount is required"],
+    },
   },
   {
     timestamps: true,

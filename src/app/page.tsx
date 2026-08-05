@@ -1,77 +1,90 @@
-import { ArrowRight } from "lucide-react";
+"use client";
+
 import Link from "next/link";
+import { ShieldCheck, UserCircle2 } from "lucide-react";
+import { motion } from "framer-motion";
 
-/**
- * Home Page (Landing / Splash)
- *
- * Temporary entry point that showcases the design system tokens
- * are working correctly. Will be replaced with a proper landing
- * page or redirect to /dashboard once auth is implemented.
- */
-export default function HomePage() {
+export default function LandingPage() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-bg-base px-6">
-      {/* Decorative background orbs */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/3 h-125 w-125 rounded-full bg-primary/5 blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/3 h-100 w-100 rounded-full bg-accent/5 blur-3xl" />
-      </div>
+    <div className="min-h-screen bg-bg-base flex flex-col font-sans">
+      {/* Navbar (Minimal) */}
+      <header className="fixed top-0 inset-x-0 z-50 bg-bg-base/80 backdrop-blur-md border-b border-white/5">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center h-20">
+            <span className="text-2xl font-bold tracking-wider text-white">DIVYAM</span>
+          </div>
+        </div>
+      </header>
 
-      {/* Content */}
-      <div className="relative z-10 mx-auto max-w-2xl text-center">
-        {/* Badge */}
-        <div className="mb-8 inline-flex items-center gap-2 rounded-pill border border-border bg-surface-1 px-4 py-1.5 text-xs font-medium text-foreground-secondary shadow-sm">
-          <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
-          Design System Active
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col items-center justify-center p-4 relative z-10">
+        <div className="text-center mb-16">
+          <h1 className="text-4xl md:text-5xl font-light text-white mb-4 tracking-tight">
+            Welcome to <span className="font-medium text-brand-gold">Divyam</span>
+          </h1>
+          <p className="text-brand-gray text-lg max-w-xl mx-auto">
+            Select your portal to proceed.
+          </p>
         </div>
 
-        {/* Heading */}
-        <h1 className="font-display text-5xl font-medium leading-tight tracking-tight text-foreground md:text-6xl">
-          Welcome to{" "}
-          <span className="text-gradient-primary">Divyam</span>
-        </h1>
-
-        {/* Subtitle */}
-        <p className="mx-auto mt-6 max-w-lg text-lg text-foreground-secondary">
-          Premium Event Booking & Management Platform. Enterprise-grade
-          sophistication, effortless experience.
-        </p>
-
-        {/* CTA Buttons */}
-        <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-          <Link
-            href="/login"
-            className="group inline-flex items-center gap-2 rounded-sm bg-primary px-8 py-3.5 text-sm font-medium text-secondary shadow-glow transition-all duration-(--duration-micro) ease-decelerate hover:-translate-y-px hover:bg-primary-hover hover:shadow-lg active:translate-y-px"
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
+          {/* Admin Panel Card */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="bg-brand-surface border border-white/10 rounded-2xl p-8 flex flex-col items-center text-center hover:border-brand-gold/30 transition-all group"
           >
-            Get Started
-            <ArrowRight className="h-4 w-4 transition-transform duration-(--duration-micro) group-hover:translate-x-1" />
-          </Link>
-
-          <Link
-            href="/dashboard"
-            className="inline-flex items-center gap-2 rounded-sm border border-border bg-surface-1 px-8 py-3.5 text-sm font-medium text-foreground transition-all duration-(--duration-micro) ease-decelerate hover:-translate-y-px hover:border-border-hover hover:shadow-md active:translate-y-px"
-          >
-            View Dashboard
-          </Link>
-        </div>
-
-        {/* Design Token Showcase */}
-        <div className="mt-20 grid grid-cols-2 gap-4 sm:grid-cols-4">
-          {[
-            { label: "Champagne", className: "bg-primary" },
-            { label: "Copper", className: "bg-accent" },
-            { label: "Forest", className: "bg-secondary" },
-            { label: "Success", className: "bg-success" },
-          ].map(({ label, className }) => (
-            <div key={label} className="flex flex-col items-center gap-2">
-              <div
-                className={`h-12 w-12 rounded-lg ${className} shadow-md`}
-              />
-              <span className="text-xs text-foreground-tertiary">{label}</span>
+            <div className="w-16 h-16 bg-brand-gold/10 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+              <ShieldCheck className="w-8 h-8 text-brand-gold" />
             </div>
-          ))}
+            <h2 className="text-2xl font-medium text-white mb-4">Admin Panel</h2>
+            <p className="text-brand-gray mb-8 flex-1">
+              Manage the complete business.<br/><br/>
+              <span className="text-sm opacity-80">
+                Bookings • Customers • Employees • Inventory<br/>
+                Reports • Settings • Approvals • Dashboard
+              </span>
+            </p>
+            <Link 
+              href="/login?role=admin"
+              className="w-full py-3.5 bg-white/5 hover:bg-brand-gold hover:text-brand-dark text-white rounded-xl font-medium transition-all"
+            >
+              Admin Login
+            </Link>
+          </motion.div>
+
+          {/* Customer Panel Card */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="bg-brand-surface border border-white/10 rounded-2xl p-8 flex flex-col items-center text-center hover:border-brand-gold/30 transition-all group"
+          >
+            <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+              <UserCircle2 className="w-8 h-8 text-brand-gray group-hover:text-white transition-colors" />
+            </div>
+            <h2 className="text-2xl font-medium text-white mb-4">Customer Panel</h2>
+            <p className="text-brand-gray mb-8 flex-1">
+              Customers can access their booking related features.<br/><br/>
+              <span className="text-sm opacity-80">
+                My Bookings • Payments • Profile • Settings
+              </span>
+            </p>
+            <Link 
+              href="/login?role=customer"
+              className="w-full py-3.5 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-xl font-medium transition-all"
+            >
+              Customer Login
+            </Link>
+          </motion.div>
         </div>
-      </div>
+      </main>
+      
+      {/* Minimal Footer */}
+      <footer className="py-6 border-t border-white/5 text-center text-brand-gray text-sm z-10 mt-auto">
+        © {new Date().getFullYear()} Divyam Platform. All rights reserved.
+      </footer>
     </div>
   );
 }

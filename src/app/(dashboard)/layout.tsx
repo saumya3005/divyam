@@ -6,30 +6,23 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAuthStore } from "@/features/auth/store/authStore";
 import { 
   LayoutDashboard, 
-  CalendarDays, 
-  Users, 
+  Ticket, 
+  CreditCard, 
   Settings, 
+  User,
   LogOut,
   Bell,
   Search,
-  Ticket,
-  Briefcase,
-  PieChart,
-  BarChart3,
   Menu,
   X
 } from "lucide-react";
 
 const NAV_LINKS = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Bookings", href: "/bookings", icon: Ticket },
-  { name: "Events", href: "/events", icon: Briefcase },
-  { name: "Calendar", href: "/calendar", icon: CalendarDays },
-  { name: "Customers", href: "/customers", icon: Users },
-  { name: "Finance", href: "/finance", icon: PieChart },
-  { name: "Analytics", href: "/analytics", icon: BarChart3 },
-  { name: "Team", href: "/team", icon: Users },
-  { name: "Settings", href: "/settings", icon: Settings },
+  { name: "My Bookings", href: "/dashboard/bookings", icon: Ticket },
+  { name: "Payments", href: "/dashboard/payments", icon: CreditCard },
+  { name: "Profile", href: "/dashboard/profile", icon: User },
+  { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
 
 export default function DashboardLayout({
@@ -44,19 +37,19 @@ export default function DashboardLayout({
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     setIsMounted(true);
-    // Very basic auth check on mount
     const token = localStorage.getItem("auth_token");
     if (!token && !isAuthenticated) {
-      router.push("/login");
+      router.push("/login?role=customer");
     }
   }, [isAuthenticated, router]);
 
-  if (!isMounted) return null; // Prevent hydration errors with Zustand
+  if (!isMounted) return null;
 
   const handleLogout = () => {
     logout();
-    router.push("/login");
+    router.push("/");
   };
 
   return (
@@ -85,8 +78,9 @@ export default function DashboardLayout({
         </div>
 
         <div className="flex-1 overflow-y-auto py-4 px-3 space-y-1 scrollbar-hide">
+          <div className="text-xs font-semibold text-brand-gray uppercase tracking-wider px-3 mb-2 mt-4">Customer Portal</div>
           {NAV_LINKS.map((link) => {
-            const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`);
+            const isActive = pathname === link.href;
             const Icon = link.icon;
             
             return (
@@ -107,7 +101,11 @@ export default function DashboardLayout({
           })}
         </div>
 
-        <div className="p-4 border-t border-white/5">
+        <div className="p-4 border-t border-white/5 space-y-2">
+          <Link href="/" className="flex items-center gap-3 px-3 py-2.5 w-full text-left text-brand-gray hover:bg-white/5 hover:text-white rounded-lg transition-colors">
+            <Search size={18} />
+            <span className="font-medium text-sm">Browse Services</span>
+          </Link>
           <button 
             onClick={handleLogout}
             className="flex items-center gap-3 px-3 py-2.5 w-full text-left text-brand-gray hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors"
@@ -129,32 +127,22 @@ export default function DashboardLayout({
             >
               <Menu size={24} />
             </button>
-            
-            <div className="hidden sm:flex items-center bg-brand-surface rounded-full px-4 py-2 border border-white/5 w-64 focus-within:border-brand-gold/50 transition-colors">
-              <Search size={16} className="text-brand-gray mr-2" />
-              <input 
-                type="text" 
-                placeholder="Search anything..." 
-                className="bg-transparent border-none text-sm text-white focus:outline-none w-full placeholder:text-brand-gray"
-              />
-            </div>
           </div>
 
           <div className="flex items-center gap-4">
             <button className="relative p-2 text-brand-gray hover:text-white transition-colors rounded-full hover:bg-white/5">
               <Bell size={20} />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-brand-gold rounded-full ring-2 ring-bg-base" />
             </button>
             
             <div className="h-8 w-px bg-white/10 hidden sm:block" />
             
             <div className="flex items-center gap-3">
               <div className="hidden sm:block text-right">
-                <div className="text-sm font-medium text-white">{user?.firstName || "User"}</div>
-                <div className="text-xs text-brand-gray capitalize">{user?.role || "Admin"}</div>
+                <div className="text-sm font-medium text-white">{user?.firstName || "Customer"}</div>
+                <div className="text-xs text-brand-gray capitalize">{user?.role || "Customer"}</div>
               </div>
               <div className="w-9 h-9 rounded-full bg-brand-gold/20 flex items-center justify-center text-brand-gold border border-brand-gold/30 font-semibold">
-                {user?.firstName?.charAt(0) || "U"}
+                {user?.firstName?.charAt(0) || "C"}
               </div>
             </div>
           </div>

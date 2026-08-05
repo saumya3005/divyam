@@ -15,6 +15,7 @@ export function useMediaQuery(query: string): boolean {
 
   useEffect(() => {
     const mediaQuery = window.matchMedia(query);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     setMatches(mediaQuery.matches);
 
     const handler = (event: MediaQueryListEvent) => setMatches(event.matches);

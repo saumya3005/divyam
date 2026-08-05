@@ -7,24 +7,40 @@ import * as z from "zod";
 import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useSearchParams } from "next/navigation";
+import { useEffect, Suspense } from "react";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email format"),
   password: z.string().min(1, "Password is required"),
+  role: z.enum(["customer", "admin"]),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-export default function LoginPage() {
+function LoginForm() {
   const { login, isLoggingIn } = useAuth();
+  const searchParams = useSearchParams();
+  const defaultRole = (searchParams.get("role") as "customer" | "admin") || "customer";
   
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
+    defaultValues: { role: defaultRole }
   });
+
+  const selectedRole = watch("role");
+
+  useEffect(() => {
+    if (searchParams.get("role")) {
+      setValue("role", searchParams.get("role") as "customer" | "admin");
+    }
+  }, [searchParams, setValue]);
 
   const onSubmit = (data: LoginFormValues) => {
     login(data);
@@ -38,6 +54,20 @@ export default function LoginPage() {
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
+        
+        <div className="flex flex-col gap-2 mb-2">
+          <label className="text-sm text-brand-gray ml-1">Login As</label>
+          <div className="grid grid-cols-2 gap-3">
+            <label className={`cursor-pointer border rounded-xl p-3 flex items-center justify-center gap-2 transition-all ${selectedRole === 'customer' ? 'border-brand-gold bg-brand-gold/10 text-brand-gold' : 'border-white/10 bg-brand-surface text-brand-gray hover:border-white/20'}`}>
+              <input type="radio" value="customer" {...register("role")} className="hidden" />
+              <span className="font-medium text-sm">Customer</span>
+            </label>
+            <label className={`cursor-pointer border rounded-xl p-3 flex items-center justify-center gap-2 transition-all ${selectedRole === 'admin' ? 'border-brand-gold bg-brand-gold/10 text-brand-gold' : 'border-white/10 bg-brand-surface text-brand-gray hover:border-white/20'}`}>
+              <input type="radio" value="admin" {...register("role")} className="hidden" />
+              <span className="font-medium text-sm">Admin</span>
+            </label>
+          </div>
+        </div>
         <div className="flex flex-col gap-1.5">
           <label className="text-sm text-brand-gray ml-1">Email Address</label>
           <input
@@ -92,5 +122,13 @@ export default function LoginPage() {
         </Link>
       </p>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="flex justify-center p-12"><Loader2 className="w-8 h-8 animate-spin text-brand-gold" /></div>}>
+      <LoginForm />
+    </Suspense>
   );
 }

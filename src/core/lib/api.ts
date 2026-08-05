@@ -21,7 +21,7 @@ export interface ApiError {
  * - Response interceptor handles 401 (redirect to login).
  */
 const apiClient: AxiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api",
+  baseURL: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1",
   timeout: 15000,
   headers: {
     "Content-Type": "application/json",
@@ -47,7 +47,9 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError<ApiError>) => {
-    if (error.response?.status === 401 && typeof window !== "undefined") {
+    const isAuthRoute = error.config?.url?.includes('/auth/login') || error.config?.url?.includes('/auth/register');
+    
+    if (error.response?.status === 401 && typeof window !== "undefined" && !isAuthRoute) {
       localStorage.removeItem("auth_token");
       window.location.href = "/login";
     }

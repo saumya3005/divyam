@@ -18,8 +18,12 @@ export const useAuth = () => {
     // 3. Show success toast
     toast.success(message);
     
-    // 4. Redirect to dashboard
-    router.push("/dashboard");
+    // 4. Redirect to appropriate dashboard based on role
+    if (data.data.user.role === "admin") {
+      router.push("/admin");
+    } else {
+      router.push("/dashboard");
+    }
   };
 
   const loginMutation = useMutation({

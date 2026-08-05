@@ -5,6 +5,9 @@ import morgan from "morgan";
 import { errorHandler } from "./middleware/error.middleware";
 import { AppError } from "./utils/AppError";
 import apiRoutes from "./routes";
+import authRoutes from "./routes/auth.routes";
+import bookingRoutes from "./routes/booking.routes";
+import paymentRoutes from "./routes/payment.routes";
 
 export const createApp = (): Express => {
   const app = express();
@@ -22,6 +25,11 @@ export const createApp = (): Express => {
   app.get("/health", (req: Request, res: Response) => {
     res.status(200).json({ status: "OK", timestamp: new Date().toISOString() });
   });
+
+  // Mount Routes
+  app.use("/api/v1/auth", authRoutes);
+  app.use("/api/v1/bookings", bookingRoutes);
+  app.use("/api/v1/payment", paymentRoutes);
 
   // API Routes will be mounted here
   app.use("/api/v1", apiRoutes);

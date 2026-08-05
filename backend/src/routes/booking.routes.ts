@@ -10,20 +10,22 @@ const router = Router();
 // Validation Schemas
 const createBookingSchema = z.object({
   body: z.object({
-    customer: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid customer ID"),
-    event: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid event ID"),
-    startDate: z.string().datetime(),
-    endDate: z.string().datetime(),
-    attendees: z.number().int().positive(),
-    totalPrice: z.number().positive(),
-    specialRequests: z.string().optional(),
+    customerName: z.string().min(2, "Customer name is required"),
+    email: z.string().email("Invalid email format"),
+    phone: z.string().min(10, "Phone number is required"),
+    serviceType: z.string().min(1, "Service type is required"),
+    bookingDate: z.string().datetime().or(z.string().min(10)), // flexible date
+    bookingTime: z.string().min(4, "Time is required"),
+    guests: z.number().int().positive(),
+    address: z.string().min(5, "Address is required"),
+    notes: z.string().optional(),
+    amount: z.number().positive(),
   }),
 });
 
 const updateStatusSchema = z.object({
   body: z.object({
-    status: z.enum(["pending", "confirmed", "completed", "cancelled"]).optional(),
-    paymentStatus: z.enum(["unpaid", "partial", "paid", "refunded"]).optional(),
+    bookingStatus: z.enum(["Pending", "Confirmed", "Completed", "Cancelled", "Rejected"]),
   }),
   params: z.object({
     id: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid booking ID"),
@@ -35,11 +37,24 @@ router.use(protect);
 
 router
   .route("/")
-  .get(bookingController.getAllBookings)
-  .post(validate(createBookingSchema), restrictTo("admin", "manager", "client"), bookingController.createBooking);
+  .get(restrictTo("admin"), bookingController.getAllBookings)
+  .post(validate(createBookingSchema), bookingController.createBooking);
+
+router
+  .route("/stats")
+  .get(restrictTo("admin"), bookingController.getBookingStats);
+
+router
+  .route("/my")
+  .get(bookingController.getMyBookings);
+
+router
+  .route("/:id")
+  .get(bookingController.getBooking)
+  .delete(restrictTo("admin"), bookingController.deleteBooking);
 
 router
   .route("/:id/status")
-  .patch(validate(updateStatusSchema), restrictTo("admin", "manager", "staff"), bookingController.updateBookingStatus);
+  .patch(validate(updateStatusSchema), restrictTo("admin", "manager"), bookingController.updateBookingStatus);
 
 export default router;
