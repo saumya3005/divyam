@@ -21,7 +21,7 @@ export interface ApiError {
  * - Response interceptor handles 401 (redirect to login).
  */
 const apiClient: AxiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1",
+  baseURL: `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000"}/api/v1`,
   timeout: 15000,
   headers: {
     "Content-Type": "application/json",
