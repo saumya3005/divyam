@@ -39,13 +39,7 @@ export const metadata: Metadata = {
   },
   description:
     "Enterprise-grade event booking and management platform for modern businesses.",
-  keywords: [
-    "event management",
-    "booking platform",
-    "SaaS",
-    "enterprise",
-    "event booking",
-  ],
+  keywords: "event management, booking platform, SaaS, enterprise, event booking",
 };
 
 /* ─── Root Layout ──────────────────────────────────────────────────── */
