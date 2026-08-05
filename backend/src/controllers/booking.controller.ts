@@ -48,10 +48,19 @@ export const createBooking = async (req: Request, res: Response, next: NextFunct
       }
     }
 
+    const bookingId = "BKG-" + Math.floor(100000 + Math.random() * 900000);
+    const advanceAmount = req.body.advanceAmount || 0;
+    const amount = req.body.amount || 0;
+    const remainingAmount = amount - advanceAmount;
+
     // Inject userId from protected route middleware
     const bookingData = {
       ...req.body,
+      bookingId,
+      advanceAmount,
+      remainingAmount,
       userId: req.user?._id,
+      createdBy: req.user?._id,
     };
 
     const booking = await Booking.create(bookingData);
@@ -95,7 +104,24 @@ export const getMyBookings = async (req: Request, res: Response, next: NextFunct
 // Get all bookings (Admin)
 export const getAllBookings = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const bookings = await Booking.find()
+    const { search, status, paymentStatus, serviceId, eventType } = req.query;
+    let query: any = { isDeleted: { $ne: true } };
+
+    if (status) query.bookingStatus = status;
+    if (paymentStatus) query.paymentStatus = paymentStatus;
+    if (serviceId) query.serviceId = serviceId;
+    if (eventType) query.serviceType = eventType;
+    if (search) {
+      query.$or = [
+        { bookingId: { $regex: search as string, $options: "i" } },
+        { customerName: { $regex: search as string, $options: "i" } },
+        { phone: { $regex: search as string, $options: "i" } },
+        { email: { $regex: search as string, $options: "i" } },
+        { address: { $regex: search as string, $options: "i" } }
+      ];
+    }
+
+    const bookings = await Booking.find(query)
       .populate("userId", "firstName lastName email")
       .populate("serviceId", "title")
       .populate("eventId", "title")
@@ -121,7 +147,7 @@ export const getBooking = async (req: Request, res: Response, next: NextFunction
     }
 
     // Security check: Only admin or the booking owner can view it
-    if (req.user?.role !== "admin" && booking.userId.toString() !== req.user?._id.toString()) {
+    if (req.user?.role !== "admin" && booking.userId && booking.userId.toString() !== req.user?._id.toString()) {
       return next(new AppError("You do not have permission to view this booking", 403));
     }
 
@@ -179,10 +205,32 @@ export const updateBookingStatus = async (req: Request, res: Response, next: Nex
   }
 };
 
+// Update full booking (Admin)
+export const updateBooking = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    if (req.body.amount !== undefined && req.body.advanceAmount !== undefined) {
+      req.body.remainingAmount = req.body.amount - req.body.advanceAmount;
+    }
+    const booking = await Booking.findByIdAndUpdate(id, req.body, { new: true, runValidators: true });
+    
+    if (!booking) {
+      return next(new AppError("No booking found with that ID", 404));
+    }
+
+    res.status(200).json({
+      success: true,
+      data: { booking },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // Delete booking (Admin)
 export const deleteBooking = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const booking = await Booking.findByIdAndDelete(req.params.id);
+    const booking = await Booking.findByIdAndUpdate(req.params.id, { isDeleted: true });
 
     if (!booking) {
       return next(new AppError("No booking found with that ID", 404));

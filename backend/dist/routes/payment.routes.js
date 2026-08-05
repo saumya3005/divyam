@@ -57,4 +57,11 @@ const verifyPaymentSchema = zod_1.z.object({
 router.use(auth_middleware_1.protect);
 router.post("/create-order", (0, validate_middleware_1.validate)(createOrderSchema), paymentController.createOrder);
 router.post("/verify", (0, validate_middleware_1.validate)(verifyPaymentSchema), paymentController.verifyPayment);
+const role_middleware_1 = require("../middleware/role.middleware");
+// Admin routes
+router.use((0, role_middleware_1.restrictTo)("admin"));
+router.get("/", paymentController.getAllPayments);
+router.get("/:id", paymentController.getPayment);
+router.patch("/:id", paymentController.updatePayment);
+router.delete("/:id", paymentController.deletePayment);
 exports.default = router;

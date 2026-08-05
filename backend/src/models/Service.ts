@@ -11,6 +11,7 @@ export interface IService extends Document {
   location: string;
   features: string[];
   maxGuests: number;
+  isDeleted: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -69,6 +70,10 @@ const serviceSchema = new Schema<IService>(
       type: Number,
       default: 100,
     },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    }
   },
   {
     timestamps: true,

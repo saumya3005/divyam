@@ -36,14 +36,21 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Booking = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const bookingSchema = new mongoose_1.Schema({
+    bookingId: {
+        type: String,
+        unique: true,
+    },
     userId: {
         type: mongoose_1.Schema.Types.ObjectId,
         ref: "User",
-        required: [true, "Booking must belong to a user"],
     },
     serviceId: {
         type: mongoose_1.Schema.Types.ObjectId,
         ref: "Service",
+    },
+    eventId: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: "Event",
     },
     customerName: {
         type: String,
@@ -97,6 +104,22 @@ const bookingSchema = new mongoose_1.Schema({
         type: Number,
         required: [true, "Amount is required"],
     },
+    advanceAmount: {
+        type: Number,
+        default: 0,
+    },
+    remainingAmount: {
+        type: Number,
+        default: 0,
+    },
+    createdBy: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: "User",
+    },
+    isDeleted: {
+        type: Boolean,
+        default: false,
+    }
 }, {
     timestamps: true,
 });

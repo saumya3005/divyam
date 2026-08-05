@@ -16,7 +16,7 @@ export interface Service {
   createdAt: string;
 }
 
-export const useGetServices = (params?: { category?: string; available?: boolean }) => {
+export const useGetServices = (params?: { category?: string; available?: boolean; search?: string }) => {
   return useQuery({
     queryKey: ["services", params],
     queryFn: async () => {

@@ -36,7 +36,8 @@ export const getAdminStats = async (req: Request, res: Response, next: NextFunct
       {
         $group: {
           _id: { month: { $month: "$createdAt" }, year: { $year: "$createdAt" } },
-          revenue: { $sum: "$amount" }
+          revenue: { $sum: "$amount" },
+          bookings: { $sum: 1 }
         }
       },
       { $sort: { "_id.year": 1, "_id.month": 1 } }
@@ -46,7 +47,8 @@ export const getAdminStats = async (req: Request, res: Response, next: NextFunct
       const date = new Date(item._id.year, item._id.month - 1, 1);
       return {
         name: date.toLocaleString('default', { month: 'short' }),
-        revenue: item.revenue
+        revenue: item.revenue,
+        bookings: item.bookings
       };
     });
 
@@ -56,6 +58,17 @@ export const getAdminStats = async (req: Request, res: Response, next: NextFunct
       { name: 'Completed', value: completedBookings },
       { name: 'Rejected', value: rejectedBookings },
     ];
+
+    // Top services by revenue
+    const topServices = await Booking.aggregate([
+      { $match: { paymentStatus: "Payment Successful" } },
+      { $group: { _id: "$serviceId", revenue: { $sum: "$amount" }, bookings: { $sum: 1 } } },
+      { $lookup: { from: "services", localField: "_id", foreignField: "_id", as: "serviceDetails" } },
+      { $unwind: "$serviceDetails" },
+      { $project: { name: "$serviceDetails.title", revenue: 1, bookings: 1 } },
+      { $sort: { revenue: -1 } },
+      { $limit: 4 }
+    ]);
 
     // Recent bookings (last 10)
     const recentBookings = await Booking.find()
@@ -77,7 +90,8 @@ export const getAdminStats = async (req: Request, res: Response, next: NextFunct
           totalUsers,
           totalServices,
           revenueChart: formattedRevenueChart,
-          statusChart: bookingsByStatus
+          statusChart: bookingsByStatus,
+          topServices,
         },
         recentBookings,
       },

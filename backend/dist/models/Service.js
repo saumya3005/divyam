@@ -88,6 +88,10 @@ const serviceSchema = new mongoose_1.Schema({
         type: Number,
         default: 100,
     },
+    isDeleted: {
+        type: Boolean,
+        default: false,
+    }
 }, {
     timestamps: true,
 });

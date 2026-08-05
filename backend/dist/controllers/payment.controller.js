@@ -3,10 +3,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.verifyPayment = exports.createOrder = void 0;
+exports.deletePayment = exports.updatePayment = exports.getPayment = exports.getAllPayments = exports.verifyPayment = exports.createOrder = void 0;
 const razorpay_1 = __importDefault(require("razorpay"));
 const crypto_1 = __importDefault(require("crypto"));
 const Booking_1 = require("../models/Booking");
+const Notification_1 = require("../models/Notification");
+const User_1 = require("../models/User");
+const Payment_1 = require("../models/Payment");
 const AppError_1 = require("../utils/AppError");
 // Razorpay Instance
 let razorpay = null;
@@ -29,7 +32,7 @@ const createOrder = async (req, res, next) => {
         if (!booking) {
             return next(new AppError_1.AppError("Booking not found", 404));
         }
-        if (booking.userId.toString() !== req.user?._id.toString()) {
+        if (booking.userId && booking.userId.toString() !== req.user?._id.toString()) {
             return next(new AppError_1.AppError("You can only pay for your own bookings", 403));
         }
         // MOCK MODE: If Razorpay keys are missing, return a mock order
@@ -70,20 +73,46 @@ const verifyPayment = async (req, res, next) => {
         if (!booking) {
             return next(new AppError_1.AppError("Booking not found", 404));
         }
-        // MOCK MODE: Bypass signature verification
+        // Helper function for notifications
+        const createPaymentNotifications = async (bookingDoc) => {
+            // Notify customer
+            await Notification_1.Notification.create({
+                recipient: bookingDoc.userId,
+                type: "payment_received",
+                title: "Payment Successful",
+                message: `Your payment for booking ${bookingDoc.serviceType} was successful.`,
+                link: `/dashboard/bookings/${bookingDoc._id}`
+            });
+            // Notify admins
+            const admins = await User_1.User.find({ role: "admin" });
+            for (const admin of admins) {
+                await Notification_1.Notification.create({
+                    recipient: admin._id,
+                    type: "payment_received",
+                    title: "New Payment",
+                    message: `Payment received for booking ${bookingDoc.serviceType}.`,
+                    link: `/admin/bookings/${bookingDoc._id}`
+                });
+            }
+        };
         if (mock) {
             booking.paymentStatus = "Payment Successful";
-            booking.paymentId = `pay_mock_${Date.now()}`;
             await booking.save();
-            return res.status(200).json({
-                success: true,
-                message: "Mock Payment verified successfully",
+            await createPaymentNotifications(booking);
+            // CREATE PAYMENT RECORD
+            await Payment_1.Payment.create({
+                bookingId: booking._id,
+                userId: booking.userId,
+                amount: booking.amount,
+                status: "Completed",
+                paymentMethod: "Mock",
+                transactionId: `mock_tx_${Date.now()}`
             });
+            return res.status(200).json({ success: true, data: { booking } });
         }
-        if (!process.env.RAZORPAY_KEY_SECRET) {
-            return next(new AppError_1.AppError("Razorpay secret not configured", 500));
+        if (!razorpay) {
+            return next(new AppError_1.AppError("Payment verification failed", 500));
         }
-        // Verify signature
         const body = razorpay_order_id + "|" + razorpay_payment_id;
         const expectedSignature = crypto_1.default
             .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
@@ -91,15 +120,30 @@ const verifyPayment = async (req, res, next) => {
             .digest("hex");
         if (expectedSignature === razorpay_signature) {
             booking.paymentStatus = "Payment Successful";
-            booking.paymentId = razorpay_payment_id;
             await booking.save();
-            res.status(200).json({
-                success: true,
-                message: "Payment verified successfully",
+            await createPaymentNotifications(booking);
+            // CREATE PAYMENT RECORD
+            await Payment_1.Payment.create({
+                bookingId: booking._id,
+                userId: booking.userId,
+                amount: booking.amount,
+                status: "Completed",
+                paymentMethod: "Razorpay",
+                transactionId: razorpay_payment_id
             });
+            res.status(200).json({ success: true, data: { booking } });
         }
         else {
-            return next(new AppError_1.AppError("Invalid payment signature", 400));
+            // Create Failed payment record
+            await Payment_1.Payment.create({
+                bookingId: booking._id,
+                userId: booking.userId,
+                amount: booking.amount,
+                status: "Failed",
+                paymentMethod: "Razorpay",
+                transactionId: razorpay_payment_id
+            });
+            next(new AppError_1.AppError("Invalid payment signature", 400));
         }
     }
     catch (error) {
@@ -107,3 +151,70 @@ const verifyPayment = async (req, res, next) => {
     }
 };
 exports.verifyPayment = verifyPayment;
+// Admin: Get all payments
+const getAllPayments = async (req, res, next) => {
+    try {
+        const { status, search } = req.query;
+        const filter = { isDeleted: { $ne: true } };
+        if (status)
+            filter.status = status;
+        // For search, we might want to populate user/booking but let's keep it simple
+        // Maybe search by transactionId
+        if (search) {
+            filter.transactionId = { $regex: search, $options: "i" };
+        }
+        const payments = await Payment_1.Payment.find(filter)
+            .populate("userId", "name email")
+            .populate("bookingId", "serviceType bookingDate")
+            .sort("-createdAt");
+        res.status(200).json({ success: true, count: payments.length, data: { payments } });
+    }
+    catch (error) {
+        next(error);
+    }
+};
+exports.getAllPayments = getAllPayments;
+// Admin: Get single payment
+const getPayment = async (req, res, next) => {
+    try {
+        const payment = await Payment_1.Payment.findOne({ _id: req.params.id, isDeleted: { $ne: true } })
+            .populate("userId", "name email")
+            .populate("bookingId");
+        if (!payment)
+            return next(new AppError_1.AppError("Payment not found", 404));
+        res.status(200).json({ success: true, data: { payment } });
+    }
+    catch (error) {
+        next(error);
+    }
+};
+exports.getPayment = getPayment;
+// Admin: Update Payment
+const updatePayment = async (req, res, next) => {
+    try {
+        const payment = await Payment_1.Payment.findByIdAndUpdate(req.params.id, req.body, {
+            new: true,
+            runValidators: true
+        });
+        if (!payment)
+            return next(new AppError_1.AppError("Payment not found", 404));
+        res.status(200).json({ success: true, data: { payment } });
+    }
+    catch (error) {
+        next(error);
+    }
+};
+exports.updatePayment = updatePayment;
+// Admin: Delete Payment (Soft delete)
+const deletePayment = async (req, res, next) => {
+    try {
+        const payment = await Payment_1.Payment.findByIdAndUpdate(req.params.id, { isDeleted: true });
+        if (!payment)
+            return next(new AppError_1.AppError("Payment not found", 404));
+        res.status(204).json({ success: true, data: null });
+    }
+    catch (error) {
+        next(error);
+    }
+};
+exports.deletePayment = deletePayment;

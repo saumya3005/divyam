@@ -6,6 +6,7 @@ export interface IInventory extends Document {
   quantity: number;
   availableQuantity: number;
   maintenanceStatus: "Good" | "Needs Repair" | "In Maintenance";
+  isDeleted: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -17,6 +18,7 @@ const inventorySchema = new Schema<IInventory>(
     quantity: { type: Number, required: true, min: 0 },
     availableQuantity: { type: Number, required: true, min: 0 },
     maintenanceStatus: { type: String, enum: ["Good", "Needs Repair", "In Maintenance"], default: "Good" },
+    isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

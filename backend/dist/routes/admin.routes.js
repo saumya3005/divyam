@@ -35,6 +35,7 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const adminController = __importStar(require("../controllers/admin.controller"));
+const notificationController = __importStar(require("../controllers/notification.controller"));
 const auth_middleware_1 = require("../middleware/auth.middleware");
 const role_middleware_1 = require("../middleware/role.middleware");
 const router = (0, express_1.Router)();
@@ -44,4 +45,9 @@ router.use((0, role_middleware_1.restrictTo)("admin"));
 router.get("/stats", adminController.getAdminStats);
 router.get("/users", adminController.getAllUsers);
 router.get("/bookings", adminController.getAllBookingsAdmin);
+// Notification routes for admin
+router.get("/notifications", notificationController.getMyNotifications);
+router.patch("/notifications/mark-all-read", notificationController.markAllAsRead);
+router.patch("/notifications/:id/read", notificationController.markAsRead);
+router.delete("/notifications/:id", notificationController.deleteNotification);
 exports.default = router;

@@ -13,7 +13,11 @@ const AppError_1 = require("./utils/AppError");
 const routes_1 = __importDefault(require("./routes"));
 const auth_routes_1 = __importDefault(require("./routes/auth.routes"));
 const booking_routes_1 = __importDefault(require("./routes/booking.routes"));
+const query_routes_1 = __importDefault(require("./routes/query.routes"));
+const visitor_routes_1 = __importDefault(require("./routes/visitor.routes"));
+const notification_routes_1 = __importDefault(require("./routes/notification.routes"));
 const payment_routes_1 = __importDefault(require("./routes/payment.routes"));
+const event_routes_1 = __importDefault(require("./routes/event.routes"));
 const createApp = () => {
     const app = (0, express_1.default)();
     // Middleware
@@ -30,7 +34,11 @@ const createApp = () => {
     // Mount Routes
     app.use("/api/v1/auth", auth_routes_1.default);
     app.use("/api/v1/bookings", booking_routes_1.default);
+    app.use("/api/v1/events", event_routes_1.default);
     app.use("/api/v1/payment", payment_routes_1.default);
+    app.use("/api/v1/queries", query_routes_1.default);
+    app.use("/api/v1/visitors", visitor_routes_1.default);
+    app.use("/api/v1/notifications", notification_routes_1.default);
     // API Routes will be mounted here
     app.use("/api/v1", routes_1.default);
     // Handle unhandled routes

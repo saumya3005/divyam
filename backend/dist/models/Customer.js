@@ -70,6 +70,10 @@ const customerSchema = new mongoose_1.Schema({
         default: "lead",
     },
     notes: String,
+    isDeleted: {
+        type: Boolean,
+        default: false,
+    },
 }, {
     timestamps: true,
 });

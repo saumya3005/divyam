@@ -10,6 +10,9 @@ export interface IEmployee extends Document {
   role: string;
   joiningDate: Date;
   status: "Active" | "On Leave" | "Terminated";
+  emergencyContact?: string;
+  address?: string;
+  isDeleted: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -25,6 +28,9 @@ const employeeSchema = new Schema<IEmployee>(
     role: { type: String, required: true },
     joiningDate: { type: Date, required: true },
     status: { type: String, enum: ["Active", "On Leave", "Terminated"], default: "Active" },
+    emergencyContact: { type: String },
+    address: { type: String },
+    isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

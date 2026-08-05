@@ -5,7 +5,7 @@ import { AppError } from "../utils/AppError";
 // Get all published events (Public/Customer)
 export const getPublishedEvents = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const events = await Event.find({ status: "published" }).sort("-createdAt");
+    const events = await Event.find({ status: "published", isDeleted: { $ne: true } }).sort("-createdAt");
     res.status(200).json({ success: true, count: events.length, data: { events } });
   } catch (error) {
     next(error);
@@ -15,7 +15,19 @@ export const getPublishedEvents = async (req: Request, res: Response, next: Next
 // Get all events (Admin)
 export const getAllEvents = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const events = await Event.find().sort("-createdAt");
+    const { search, status, eventType } = req.query;
+    const filter: any = { isDeleted: { $ne: true } };
+
+    if (status) filter.status = status;
+    if (eventType) filter.eventType = eventType;
+    if (search) {
+      filter.$or = [
+        { title: { $regex: search as string, $options: "i" } },
+        { description: { $regex: search as string, $options: "i" } },
+      ];
+    }
+
+    const events = await Event.find(filter).sort("-createdAt");
     res.status(200).json({ success: true, count: events.length, data: { events } });
   } catch (error) {
     next(error);
@@ -25,7 +37,7 @@ export const getAllEvents = async (req: Request, res: Response, next: NextFuncti
 // Get single event
 export const getEvent = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const event = await Event.findById(req.params.id);
+    const event = await Event.findOne({ _id: req.params.id, isDeleted: { $ne: true } });
     if (!event) return next(new AppError("Event not found", 404));
 
     if (event.status !== "published" && req.user?.role !== "admin") {
@@ -65,10 +77,11 @@ export const updateEvent = async (req: Request, res: Response, next: NextFunctio
 // Delete Event (Admin)
 export const deleteEvent = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const event = await Event.findByIdAndDelete(req.params.id);
+    const event = await Event.findByIdAndUpdate(req.params.id, { isDeleted: true });
     if (!event) return next(new AppError("Event not found", 404));
     res.status(204).json({ success: true, data: null });
   } catch (error) {
     next(error);
   }
 };
+

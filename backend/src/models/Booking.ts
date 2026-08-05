@@ -1,7 +1,8 @@
 import mongoose, { Document, Schema } from "mongoose";
 
 export interface IBooking extends Document {
-  userId: mongoose.Types.ObjectId;
+  bookingId: string;
+  userId?: mongoose.Types.ObjectId;
   serviceId?: mongoose.Types.ObjectId;
   eventId?: mongoose.Types.ObjectId;
   customerName: string;
@@ -17,16 +18,23 @@ export interface IBooking extends Document {
   paymentStatus: "Payment Pending" | "Payment Successful" | "Refunded";
   paymentId?: string;
   amount: number;
+  advanceAmount: number;
+  remainingAmount: number;
+  createdBy?: mongoose.Types.ObjectId;
+  isDeleted: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
 
 const bookingSchema = new Schema<IBooking>(
   {
+    bookingId: {
+      type: String,
+      unique: true,
+    },
     userId: {
       type: Schema.Types.ObjectId,
       ref: "User",
-      required: [true, "Booking must belong to a user"],
     },
     serviceId: {
       type: Schema.Types.ObjectId,
@@ -88,6 +96,22 @@ const bookingSchema = new Schema<IBooking>(
       type: Number,
       required: [true, "Amount is required"],
     },
+    advanceAmount: {
+      type: Number,
+      default: 0,
+    },
+    remainingAmount: {
+      type: Number,
+      default: 0,
+    },
+    createdBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    }
   },
   {
     timestamps: true,

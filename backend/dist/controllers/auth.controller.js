@@ -41,7 +41,7 @@ const register = async (req, res, next) => {
 exports.register = register;
 const login = async (req, res, next) => {
     try {
-        const { email, password } = req.body;
+        const { email, password, role } = req.body;
         // Check if email and password exist
         if (!email || !password) {
             return next(new AppError_1.AppError("Please provide email and password", 400));
@@ -50,6 +50,10 @@ const login = async (req, res, next) => {
         const user = await User_1.User.findOne({ email }).select("+password");
         if (!user || !(await (0, hash_service_1.comparePasswords)(password, user.password))) {
             return next(new AppError_1.AppError("Incorrect email or password", 401));
+        }
+        // Check admin gate
+        if (role === "admin" && user.role !== "admin") {
+            return next(new AppError_1.AppError("Unauthorized Access: Admin privileges required", 403));
         }
         // Generate token
         const token = (0, jwt_service_1.generateToken)(user._id, user.role);

@@ -19,7 +19,31 @@ const createBookingSchema = z.object({
     guests: z.number().int().positive(),
     address: z.string().min(5, "Address is required"),
     notes: z.string().optional(),
-    amount: z.number().positive(),
+    amount: z.number().nonnegative(),
+    advanceAmount: z.number().nonnegative().optional(),
+    remainingAmount: z.number().nonnegative().optional(),
+  }),
+});
+
+const updateBookingSchema = z.object({
+  body: z.object({
+    customerName: z.string().min(2).optional(),
+    email: z.string().email().optional(),
+    phone: z.string().min(10).optional(),
+    serviceType: z.string().min(1).optional(),
+    bookingDate: z.string().optional(),
+    bookingTime: z.string().optional(),
+    guests: z.number().int().positive().optional(),
+    address: z.string().min(5).optional(),
+    notes: z.string().optional(),
+    amount: z.number().nonnegative().optional(),
+    advanceAmount: z.number().nonnegative().optional(),
+    remainingAmount: z.number().nonnegative().optional(),
+    bookingStatus: z.enum(["Pending", "Confirmed", "Completed", "Cancelled", "Rejected"]).optional(),
+    paymentStatus: z.enum(["Payment Pending", "Payment Successful", "Refunded"]).optional(),
+  }),
+  params: z.object({
+    id: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid booking ID"),
   }),
 });
 
@@ -51,6 +75,7 @@ router
 router
   .route("/:id")
   .get(bookingController.getBooking)
+  .put(validate(updateBookingSchema), restrictTo("admin", "manager"), bookingController.updateBooking)
   .delete(restrictTo("admin"), bookingController.deleteBooking);
 
 router

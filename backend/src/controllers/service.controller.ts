@@ -5,10 +5,16 @@ import { AppError } from "../utils/AppError";
 // GET all services (Public)
 export const getAllServices = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { category, available } = req.query;
-    const filter: any = {};
+    const { category, available, search } = req.query;
+    const filter: any = { isDeleted: { $ne: true } };
     if (category) filter.category = category;
     if (available !== undefined) filter.availability = available === "true";
+    if (search) {
+      filter.$or = [
+        { title: { $regex: search as string, $options: "i" } },
+        { category: { $regex: search as string, $options: "i" } },
+      ];
+    }
 
     const services = await Service.find(filter).sort("-createdAt");
 
@@ -25,7 +31,7 @@ export const getAllServices = async (req: Request, res: Response, next: NextFunc
 // GET single service (Public)
 export const getService = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const service = await Service.findById(req.params.id);
+    const service = await Service.findOne({ _id: req.params.id, isDeleted: { $ne: true } });
     if (!service) {
       return next(new AppError("Service not found", 404));
     }
@@ -77,7 +83,7 @@ export const updateService = async (req: Request, res: Response, next: NextFunct
 // DELETE service (Admin only)
 export const deleteService = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const service = await Service.findByIdAndDelete(req.params.id);
+    const service = await Service.findByIdAndUpdate(req.params.id, { isDeleted: true });
 
     if (!service) {
       return next(new AppError("Service not found", 404));

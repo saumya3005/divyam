@@ -15,6 +15,7 @@ export interface ICustomer extends Document {
   industry?: string;
   status: "active" | "inactive" | "lead";
   notes?: string;
+  isDeleted: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -55,6 +56,10 @@ const customerSchema = new Schema<ICustomer>(
       default: "lead",
     },
     notes: String,
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

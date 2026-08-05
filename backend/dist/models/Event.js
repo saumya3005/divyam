@@ -67,6 +67,10 @@ const eventSchema = new mongoose_1.Schema({
         default: "draft",
     },
     coverImage: String,
+    isDeleted: {
+        type: Boolean,
+        default: false,
+    },
 }, {
     timestamps: true,
 });

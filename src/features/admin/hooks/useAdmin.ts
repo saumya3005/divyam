@@ -13,6 +13,7 @@ export interface AdminStats {
   totalServices: number;
   revenueChart: any[];
   statusChart: any[];
+  topServices?: any[];
 }
 
 export interface AdminDashboardData {

@@ -19,6 +19,50 @@ const getAdminStats = async (req, res, next) => {
         const totalRevenue = revenueAgg.length > 0 ? revenueAgg[0].totalRevenue : 0;
         const totalUsers = await User_1.User.countDocuments({ role: { $ne: "admin" } });
         const totalServices = await Service_1.Service.countDocuments();
+        // Chart Data: Revenue by month (last 6 months)
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+        sixMonthsAgo.setDate(1);
+        const revenueByMonth = await Booking_1.Booking.aggregate([
+            {
+                $match: {
+                    paymentStatus: "Payment Successful",
+                    createdAt: { $gte: sixMonthsAgo }
+                }
+            },
+            {
+                $group: {
+                    _id: { month: { $month: "$createdAt" }, year: { $year: "$createdAt" } },
+                    revenue: { $sum: "$amount" },
+                    bookings: { $sum: 1 }
+                }
+            },
+            { $sort: { "_id.year": 1, "_id.month": 1 } }
+        ]);
+        const formattedRevenueChart = revenueByMonth.map(item => {
+            const date = new Date(item._id.year, item._id.month - 1, 1);
+            return {
+                name: date.toLocaleString('default', { month: 'short' }),
+                revenue: item.revenue,
+                bookings: item.bookings
+            };
+        });
+        const bookingsByStatus = [
+            { name: 'Pending', value: pendingBookings },
+            { name: 'Confirmed', value: confirmedBookings },
+            { name: 'Completed', value: completedBookings },
+            { name: 'Rejected', value: rejectedBookings },
+        ];
+        // Top services by revenue
+        const topServices = await Booking_1.Booking.aggregate([
+            { $match: { paymentStatus: "Payment Successful" } },
+            { $group: { _id: "$serviceId", revenue: { $sum: "$amount" }, bookings: { $sum: 1 } } },
+            { $lookup: { from: "services", localField: "_id", foreignField: "_id", as: "serviceDetails" } },
+            { $unwind: "$serviceDetails" },
+            { $project: { name: "$serviceDetails.title", revenue: 1, bookings: 1 } },
+            { $sort: { revenue: -1 } },
+            { $limit: 4 }
+        ]);
         // Recent bookings (last 10)
         const recentBookings = await Booking_1.Booking.find()
             .populate("userId", "firstName lastName email")
@@ -37,6 +81,9 @@ const getAdminStats = async (req, res, next) => {
                     totalRevenue,
                     totalUsers,
                     totalServices,
+                    revenueChart: formattedRevenueChart,
+                    statusChart: bookingsByStatus,
+                    topServices,
                 },
                 recentBookings,
             },

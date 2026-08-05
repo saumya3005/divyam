@@ -52,7 +52,30 @@ const createBookingSchema = zod_1.z.object({
         guests: zod_1.z.number().int().positive(),
         address: zod_1.z.string().min(5, "Address is required"),
         notes: zod_1.z.string().optional(),
-        amount: zod_1.z.number().positive(),
+        amount: zod_1.z.number().nonnegative(),
+        advanceAmount: zod_1.z.number().nonnegative().optional(),
+        remainingAmount: zod_1.z.number().nonnegative().optional(),
+    }),
+});
+const updateBookingSchema = zod_1.z.object({
+    body: zod_1.z.object({
+        customerName: zod_1.z.string().min(2).optional(),
+        email: zod_1.z.string().email().optional(),
+        phone: zod_1.z.string().min(10).optional(),
+        serviceType: zod_1.z.string().min(1).optional(),
+        bookingDate: zod_1.z.string().optional(),
+        bookingTime: zod_1.z.string().optional(),
+        guests: zod_1.z.number().int().positive().optional(),
+        address: zod_1.z.string().min(5).optional(),
+        notes: zod_1.z.string().optional(),
+        amount: zod_1.z.number().nonnegative().optional(),
+        advanceAmount: zod_1.z.number().nonnegative().optional(),
+        remainingAmount: zod_1.z.number().nonnegative().optional(),
+        bookingStatus: zod_1.z.enum(["Pending", "Confirmed", "Completed", "Cancelled", "Rejected"]).optional(),
+        paymentStatus: zod_1.z.enum(["Payment Pending", "Payment Successful", "Refunded"]).optional(),
+    }),
+    params: zod_1.z.object({
+        id: zod_1.z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid booking ID"),
     }),
 });
 const updateStatusSchema = zod_1.z.object({
@@ -78,6 +101,7 @@ router
 router
     .route("/:id")
     .get(bookingController.getBooking)
+    .put((0, validate_middleware_1.validate)(updateBookingSchema), (0, role_middleware_1.restrictTo)("admin", "manager"), bookingController.updateBooking)
     .delete((0, role_middleware_1.restrictTo)("admin"), bookingController.deleteBooking);
 router
     .route("/:id/status")

@@ -3,6 +3,7 @@ import apiClient from "@/core/lib/api";
 
 export interface BookingType {
   _id: string;
+  bookingId?: string;
   customerName: string;
   email: string;
   phone: string;
@@ -18,6 +19,8 @@ export interface BookingType {
   paymentStatus: "Payment Pending" | "Payment Successful" | "Refunded";
   paymentId?: string;
   amount: number;
+  advanceAmount?: number;
+  remainingAmount?: number;
   createdAt: string;
 };
 
@@ -33,17 +36,18 @@ export const useGetMyBookings = () => {
 };
 
 // GET All Bookings (Admin)
-export const useGetAllBookings = () => {
+export const useGetAllBookings = (filters?: Record<string, string>) => {
   return useQuery({
-    queryKey: ["bookings", "all"],
+    queryKey: ["bookings", "all", filters],
     queryFn: async () => {
-      const response = await apiClient.get<{ data: { bookings: BookingType[] } }>("/bookings");
+      const params = new URLSearchParams(filters).toString();
+      const response = await apiClient.get<{ data: { bookings: BookingType[] } }>(`/bookings?${params}`);
       return response.data.data.bookings;
     },
   });
 };
 
-// POST Create Booking
+// POST Create Booking (Customer)
 export const useCreateBooking = () => {
   const queryClient = useQueryClient();
 
@@ -58,6 +62,21 @@ export const useCreateBooking = () => {
   });
 };
 
+// POST Create Booking (Admin)
+export const useCreateBookingAdmin = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: Partial<BookingType>) => {
+      const response = await apiClient.post<{ data: { booking: BookingType } }>("/bookings", data);
+      return response.data.data.booking;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["bookings", "all"] });
+    },
+  });
+};
+
 // PATCH Update Booking Status (Admin)
 export const useUpdateBookingStatus = () => {
   const queryClient = useQueryClient();
@@ -65,6 +84,37 @@ export const useUpdateBookingStatus = () => {
   return useMutation({
     mutationFn: async ({ id, status }: { id: string; status: BookingType["bookingStatus"] }) => {
       const response = await apiClient.patch(`/bookings/${id}/status`, { bookingStatus: status });
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["bookings", "all"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "stats"] });
+    },
+  });
+};
+
+// PUT Update Full Booking (Admin)
+export const useUpdateBookingAdmin = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<BookingType> }) => {
+      const response = await apiClient.put<{ data: { booking: BookingType } }>(`/bookings/${id}`, data);
+      return response.data.data.booking;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["bookings", "all"] });
+    },
+  });
+};
+
+// DELETE Booking (Admin)
+export const useDeleteBooking = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const response = await apiClient.delete(`/bookings/${id}`);
       return response.data;
     },
     onSuccess: () => {

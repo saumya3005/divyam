@@ -9,6 +9,7 @@ export interface IEvent extends Document {
   amenities: string[];
   status: "draft" | "published" | "archived";
   coverImage?: string;
+  isDeleted: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -46,6 +47,10 @@ const eventSchema = new Schema<IEvent>(
       default: "draft",
     },
     coverImage: String,
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

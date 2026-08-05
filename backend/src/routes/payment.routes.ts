@@ -28,4 +28,13 @@ router.use(protect);
 router.post("/create-order", validate(createOrderSchema), paymentController.createOrder);
 router.post("/verify", validate(verifyPaymentSchema), paymentController.verifyPayment);
 
+import { restrictTo } from "../middleware/role.middleware";
+
+// Admin routes
+router.use(restrictTo("admin"));
+router.get("/", paymentController.getAllPayments);
+router.get("/:id", paymentController.getPayment);
+router.patch("/:id", paymentController.updatePayment);
+router.delete("/:id", paymentController.deletePayment);
+
 export default router;
